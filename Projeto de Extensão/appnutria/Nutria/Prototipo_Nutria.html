@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protótipo Nutria Final</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FE4A01;
+            --primary-dark: #E44200;
+            --secondary: #4CAF50;
+            --text-strong: #000000;
+            --text-subtitle: #555555;
+            --background: #FFFFFF;
+            --light-gray: #f0f0f0;
+            --danger: #e74c3c;
+            /* Cor roxa adicionada para Business/Premium */
+            --premium-purple: #3A1C9C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-subtitle);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .mobile-container {
+            width: 100%;
+            max-width: 414px;
+            height: 100vh;
+            max-height: 896px;
+            background-color: var(--background);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .mobile-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            flex-direction: column;
+            padding: 24px;
+            animation: fadeIn 0.35s ease-out;
+            position: relative;
+        }
+
+        .screen.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-screen { justify-content: center; align-items: center; text-align: center; }
+        .logo-container img { max-width: 250px; margin-bottom: 24px; }
+        .auth-screen h1, .auth-screen h2 { color: var(--text-strong); margin-bottom: 8px; }
+        .auth-screen p { margin-bottom: 24px; max-width: 300px; }
+
+        .onboarding-icons { list-style: none; text-align: left; margin-bottom: 32px; width: 100%; max-width: 320px; }
+        .onboarding-icons li { display: flex; align-items: center; margin-bottom: 16px; font-size: 1.1rem; }
+        .onboarding-icons span { font-size: 2rem; margin-right: 16px; color: var(--primary); }
+
+        .button-row { display: flex; justify-content: space-between; gap: 16px; width: 100%; max-width: 320px; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); }
+
+        .btn { padding: 14px 24px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background-color 0.3s; width: 100%; }
+        .btn-primary { background-color: var(--primary); color: var(--background); }
+        .btn-primary:hover { background-color: var(--primary-dark); }
+        .btn-secondary { background: var(--light-gray); color: var(--text-subtitle); font-weight: 500; }
+
+        .form-group { width: 100%; max-width: 320px; margin-bottom: 16px; }
+        .form-group label { display: block; text-align: left; margin-bottom: 8px; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        .divider { margin: 24px 0; color: var(--text-subtitle); font-weight: 700; }
+        .social-login .btn { border: 1px solid #ccc; background: var(--background); color: var(--text-strong); margin-bottom: 12px; }
+        .auth-footer { margin-top: 24px; }
+        .auth-footer a { color: var(--primary); font-weight: 700; text-decoration: none; }
+
+        .goal-options { width: 100%; max-width: 320px; }
+        .goal-btn { background-color: var(--light-gray); color: var(--text-subtitle); margin-bottom: 12px; border: 2px solid var(--light-gray); }
+        .goal-btn.active { background-color: #fff; border-color: var(--primary); color: var(--primary); }
+
+        .profile-pic-preview { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--light-gray); margin-bottom: 24px; cursor: pointer; }
+
+        #main-app-screen { padding: 0; }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--background);
+            border-bottom: 1px solid var(--light-gray);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .app-header .logo-img { height: 32px; }
+        .header-icons { display: flex; align-items: center; gap: 16px; }
+        .header-icons .icon { cursor: pointer; }
+
+        .header-icons .icon svg {
+            width: 28px;
+            height: 28px;
+            fill: none;
+            stroke: var(--text-subtitle);
+            stroke-width: 2;
+        }
+
+        .app-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 0 80px 0;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .app-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .content-view { display: none; padding: 16px; }
+        .content-view.active { display: block; }
+        #feed-view { padding: 0; }
+
+        .stories-bar {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 16px;
+            background: var(--background);
+            border-bottom: 1px solid var(--light-gray);
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .stories-bar::-webkit-scrollbar { display: none; }
+        .story-bubble {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 70px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .story-bubble .story-img-wrapper {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .story-bubble .story-img {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: 2px solid var(--background);
+            object-fit: cover;
+        }
+        .story-bubble .story-username {
+            font-size: 0.8rem;
+            margin-top: 6px;
+            color: var(--text-strong);
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+
+        /* === ESTILOS DOS POSTS ATUALIZADO === */
+        .feed-post {
+            background: var(--background);
+            border-bottom: 1px solid var(--light-gray);
+            overflow: hidden;
+        }
+        .post-header { display: flex; align-items: center; justify-content: space-between; padding: 12px; }
+        .post-user { display: flex; align-items: center; }
+        .post-user img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover; }
+        .post-user .username { font-weight: 700; }
+
+        /* NOVO ESTILO PARA OFENSIVA (STREAK) */
+        .post-streak {
+            width: 50px;
+            height: 50px;
+            background-image: url('https://i.imgur.com/gBaznSm.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .post-streak span {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+            position: relative; /* Para que o translateY funcione */
+            transform: translateY(-3px); /* Ajuste: move para cima 2px */
+        }
+        /* FIM NOVO ESTILO OFENSIVA */
+
+        .post-image { width: 100%; height: auto; max-height: 500px; object-fit: cover; cursor: pointer; }
+
+        .post-footer { padding: 12px 16px; }
+        .post-interactions { display: flex; gap: 16px; align-items: center; }
+        .post-interactions .interaction-icon { cursor: pointer; }
+        .post-interactions .interaction-icon svg { width: 28px; height: 28px; stroke: var(--text-strong); fill: none; stroke-width: 2; }
+        .post-interactions .interaction-icon.liked svg { stroke: var(--danger); fill: var(--danger); }
+
+        .post-likes { font-size: 0.9rem; font-weight: 700; color: var(--text-strong); margin-top: 8px; }
+        .post-caption { margin-top: 8px; }
+        .post-caption .username { font-weight: 700; color: var(--text-strong); }
+
+        .add-comment-link { font-size: 0.9rem; color: var(--text-subtitle); margin-top: 8px; cursor: pointer; }
+
+        .post-comments-container { margin-top: 8px; }
+        .comment-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem; }
+        .comment-item .comment-user { font-weight: 700; color: var(--text-strong); margin-right: 6px; }
+        .comment-item .comment-text { flex-grow: 1; }
+        .comment-like { display: flex; align-items: center; gap: 4px; }
+        .comment-like .comment-like-btn { cursor: pointer; }
+        .comment-like .comment-like-btn svg { width: 14px; height: 14px; stroke: var(--text-strong); fill: none; stroke-width: 2.5; }
+        .comment-like .comment-like-btn.liked svg { stroke: var(--danger); fill: var(--danger); }
+
+
+        .list-item { background: var(--background); padding: 16px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .list-item h3 { color: var(--text-strong); } .list-item p { margin: 4px 0; }
+        .stars { color: var(--primary); } .btn-small { padding: 8px 12px; font-size: 0.9rem; margin-top: 8px; width: auto; }
+
+        .suggestion-group { display: none; }
+
+        #suggestions-view h2 { text-align: center; margin-bottom: 24px; }
+        .meal-card {
+            background-color: var(--background);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .meal-card-header {
+            padding: 16px;
+            background-color: var(--primary);
+            color: var(--background);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .meal-card-header span { font-size: 1.5rem; }
+        .meal-card-header h4 { font-size: 1.2rem; margin: 0; }
+        .meal-card-body { padding: 16px; }
+        .meal-card-body p { margin-bottom: 8px; font-size: 1rem; line-height: 1.5; }
+        .meal-card-body strong { color: var(--text-strong); }
+
+
+        .profile-summary { text-align: center; padding: 24px 0; }
+        .profile-summary img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--primary); object-fit: cover; }
+        .profile-summary h2 { margin-top: 12px; color: var(--text-strong); }
+        .profile-summary p { margin: 4px 0; }
+
+        .profile-stats {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            margin: 20px 0;
+            padding: 10px 0;
+            border-top: 1px solid var(--light-gray);
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .stat-item { text-align: center; }
+        .stat-item .count { font-size: 1.2rem; font-weight: 700; color: var(--text-strong); }
+        .stat-item .label { font-size: 0.8rem; color: var(--text-subtitle); }
+
+        .profile-summary .buttons { display: flex; justify-content: center; gap: 10px; margin-top: 16px; }
+
+        .bottom-nav { display: flex; justify-content: space-around; align-items: center; position: absolute; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--background); border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -4px 10px rgba(0,0,0,0.08); padding: 0 20px; z-index: 90; }
+        .bottom-nav .nav-icon { cursor: pointer; }
+        .bottom-nav .nav-icon svg { width: 32px; height: 32px; fill: #ccc; transition: fill 0.3s; }
+        .bottom-nav .nav-icon.active svg { fill: var(--primary); }
+
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 24px;
+            width: 90%;
+            max-width: 320px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 { font-size: 1.3rem; margin-bottom: 24px; color: var(--text-strong); }
+        .modal-content .btn { margin-top: 12px; }
+        .modal-content .btn-cancel { background: var(--light-gray); color: var(--text-subtitle); font-weight: 500; }
+
+        #addPostModal {
+            display: none;
+            position: absolute;
+            z-index: 95;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 250px;
+            background: var(--background);
+            border-radius: 12px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: slideUp 0.3s ease-out;
+        }
+        #addPostModal .btn {
+            border-radius: 0;
+            width: 100%;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        #addPostModal .btn:not(:last-child) { border-bottom: 1px solid var(--light-gray); }
+        #addPostModal .btn-primary { background: var(--primary); color: #fff; }
+        #addPostModal .btn-secondary { background: #fff; color: var(--text-strong); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        .story-view-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 200;
+            padding: 0;
+            justify-content: center;
+            align-items: center;
+        }
+        .story-view-screen.active { display: flex; }
+        .story-view-screen img {
+            width: 100%;
+            height: auto;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .close-story-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 300;
+        }
+
+        .create-post-preview { width: 100%; max-width: 350px; height: auto; border-radius: 12px; margin-bottom: 16px; }
+        input[type="file"] { display: none; }
+
+        /* === ESTILOS DA ABA GRUPOS === */
+        #groups-view { padding-top: 24px; }
+        .group-sub-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            animation: fadeIn 0.35s ease-out;
+        }
+        .group-sub-view.active { display: flex; }
+
+        #group-landing-image {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+        #groups-initial-view h2 {
+            width: 100%;
+            text-align: center;
+            color: var(--text-strong);
+            margin-bottom: 24px; /* Mesmo espaçamento da imagem */
+        }
+        /* NOVO BOTÃO BUSINESS */
+        #btn-show-business {
+             background-color: var(--premium-purple);
+             color: #FFFFFF;
+             margin-top: 16px;
+        }
+
+
+        /* Estilos para os formulários de grupo */
+        #groups-create-view .form-group,
+        #groups-join-view .form-group {
+             max-width: 320px; /* Alinha com o resto do auth */
+             width: 100%;
+        }
+        #groups-create-view h2,
+        #groups-join-view h2 {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 24px;
+            color: var(--text-strong);
+        }
+        #groups-create-view .profile-pic-preview {
+            width: 120px; /* Um pouco menor que o de perfil */
+            height: 120px;
+            margin-bottom: 24px;
+        }
+        #groups-join-result h3 {
+             color: var(--text-strong);
+             margin-bottom: 8px;
+        }
+        #groups-join-status {
+            background: var(--light-gray);
+            border-radius: 12px;
+            max-width: 320px;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+        #groups-join-status p:first-child { font-size: 2rem; }
+        /* === FIM ESTILOS GRUPOS === */
+
+        /* === ESTILOS DA TELA DE BOAS-VINDAS === */
+        #welcome-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .welcome-results {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .welcome-results h1 {
+            font-size: 1.5rem;
+            color: var(--text-strong);
+            margin-bottom: 16px;
+        }
+
+        .welcome-results p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            color: var(--text-strong);
+        }
+
+        .welcome-results strong {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .welcome-results button {
+            margin-top: 24px;
+        }
+        /* === FIM ESTILOS BOAS-VINDAS === */
+
+        /* === ESTILOS DO BOTÃO PREMIUM NO PERFIL === */
+        #btn-premium-profile {
+            background-color: var(--premium-purple); /* Roxo */
+            color: #FFFFFF; /* Branco */
+            font-weight: 700; /* Mais destaque */
+            padding: 10px 18px; /* Aumenta um pouco o padding do btn-small */
+        }
+
+        /* === ESTILOS DA TELA PREMIUM === */
+        #premium-screen {
+            background-image: url('https://i.imgur.com/uFx9IzN.jpeg'); /* Link direto img background */
+            background-size: cover;
+            background-position: center;
+            color: #FFFFFF; /* Texto padrão branco */
+            justify-content: space-around; /* Distribui espaço */
+            align-items: center;
+            padding: 40px 24px; /* Mais padding vertical */
+            text-align: center;
+            overflow: hidden; /* Garante que nada saia */
+        }
+
+        .close-premium-btn { /* Estilo unificado para botões fechar */
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2.5rem; /* Maior para facilitar o clique */
+            color: rgba(255, 255, 255, 0.8); /* Branco semitransparente */
+            cursor: pointer;
+            font-weight: 300;
+            line-height: 1;
+            transition: color 0.2s;
+            z-index: 10; /* Garante que fique acima de outros elementos */
+        }
+        .close-premium-btn:hover {
+            color: #FFFFFF; /* Branco sólido no hover */
+        }
+
+
+        #premium-logo {
+            max-width: 220px; /* Ajuste o tamanho conforme necessário */
+            margin-bottom: 30px; /* Espaço abaixo da logo */
+        }
+
+        #premium-benefits {
+            width: 100%;
+            max-width: 320px;
+            text-align: left;
+            margin-bottom: 40px; /* Espaço antes do botão final */
+        }
+
+        #premium-benefits p {
+            font-size: 1.1rem;
+            margin-bottom: 18px; /* Espaçamento entre os benefícios */
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Espaço entre o check e o texto */
+            line-height: 1.4;
+        }
+
+        #btn-subscribe-premium {
+            background-color: var(--background); /* Botão branco */
+            color: var(--premium-purple); /* Texto roxo */
+            font-weight: 700;
+        }
+        #btn-subscribe-premium:hover {
+            background-color: var(--light-gray); /* Leve cinza no hover */
+        }
+        /* === FIM ESTILOS PREMIUM === */
+
+        /* === (NOVO) ESTILOS DA TELA BUSINESS === */
+        #business-screen {
+            background-image: url('https://i.imgur.com/uFx9IzN.jpeg'); /* Mesmo background */
+            background-size: cover;
+            background-position: center;
+            color: #FFFFFF;
+            justify-content: space-around;
+            align-items: center;
+            padding: 40px 24px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        #business-logo {
+             max-width: 280px; /* Ajuste se necessário, talvez maior que a premium */
+             margin-bottom: 20px;
+        }
+
+        #business-headline {
+             font-size: 1.2rem;
+             font-weight: 500;
+             line-height: 1.5;
+             max-width: 340px;
+             margin-bottom: 30px;
+        }
+
+        /* Reutiliza a estilização dos benefícios da tela premium */
+        #business-benefits {
+             width: 100%;
+             max-width: 320px;
+             text-align: left;
+             margin-bottom: 30px; /* Menos espaço antes dos botões finais */
+        }
+         #business-benefits p {
+             font-size: 1.1rem;
+             margin-bottom: 18px;
+             display: flex;
+             align-items: center;
+             gap: 12px;
+             line-height: 1.4;
+         }
+
+        #business-buttons {
+             width: 100%;
+             max-width: 320px;
+             display: flex;
+             flex-direction: column;
+             gap: 16px; /* Espaço entre os dois botões */
+        }
+
+        #business-buttons .btn {
+            background-color: var(--background); /* Botões brancos */
+            color: var(--premium-purple); /* Texto roxo */
+            font-weight: 700;
+        }
+         #business-buttons .btn:hover {
+             background-color: var(--light-gray);
+         }
+        /* === FIM ESTILOS BUSINESS === */
+
+
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <input type="file" id="takePhotoInput" accept="image/*" capture="environment">
+        <input type="file" id="galleryInput" accept="image/*">
+        <input type="file" id="profilePicInput" accept="image/*">
+
+    <section class="screen auth-screen active" id="onboarding-1">
+            <h1 style="color: #FF6600;">Seja bem vindo(a)</h1>
+
+            <div class="logo-container"><img src="https://i.imgur.com/pPL5jeX.png" alt="Logotipo Nutria"></div>
+
+            <p>Alimentando uma vida saudável</p>
+            <div class="button-row"><button class="btn btn-secondary" id="skipIntroBtn">Pular</button><button class="btn btn-primary" id="nextOnboardingBtn">Próximo</button></div>
+        </section>
+
+        <section class="screen auth-screen" id="onboarding-2">
+            <div class="logo-container"><img src="https://i.imgur.com/pPL5jeX.png" alt="Logotipo Nutria"></div>
+            <ul class="onboarding-icons">
+                <li><span>🍽️</span> Planeje sua rotina de alimentação saudável.</li>
+                <li><span>📈</span> Compartilhe seu progresso com a comunidade.</li>
+                <li><span>🥗</span> Descubra restaurantes com comida boa e saudável.</li>
+            </ul>
+            <div class="button-row"><button class="btn btn-primary" id="startBtn">Começar</button></div>
+        </section>
+
+        <section class="screen auth-screen" id="login-screen">
+             <div class="logo-container"><img src="https://i.imgur.com/pPL5jeX.png" alt="Logotipo Nutria"></div>
+            <form class="form-group" id="loginForm">
+                <input type="text" placeholder="Nome de usuário ou e-mail"><input type="password" placeholder="Senha" style="margin-top: 16px;">
+            </form>
+            <div class="form-group"><button type="submit" class="btn btn-primary">Entrar</button></div>
+            <p class="divider">ou</p>
+            <div class="social-login form-group"><button class="btn">Continue com Google</button><button class="btn">Continue com Apple</button></div>
+            <p class="auth-footer">Não tem uma conta? <a href="#" id="showRegister">Cadastre-se</a></p>
+        </section>
+
+        <section class="screen auth-screen" id="register-screen">
+             <div class="logo-container"><img src="https://i.imgur.com/pPL5jeX.png" alt="Logotipo Nutria"></div>
+            <form id="registerForm">
+                <div class="form-group"><input type="email" id="registerEmail" placeholder="E-mail" required></div>
+                <div class="form-group"><input type="text" id="registerUsername" placeholder="Nome de usuário" required></div>
+                <div class="form-group"><input type="password" placeholder="Senha" required></div>
+                <div class="form-group"><button type="submit" class="btn btn-primary">Cadastre-se</button></div>
+            </form>
+            <p class="auth-footer" style="font-size: 0.8rem;">Ao se cadastrar, você concorda com nossos Termos.</p>
+        </section>
+
+        <section class="screen auth-screen" id="goal-screen">
+            <h2>Qual é seu objetivo?</h2><p>Isso nos ajuda a personalizar suas sugestões.</p>
+            <div class="goal-options">
+                <button class="btn goal-btn" data-goal="Emagrecimento">Emagrecimento</button>
+                <button class="btn goal-btn" data-goal="massa">Ganho de massa muscular</button>
+                <button class="btn goal-btn" data-goal="definir">Manutenção calórica</button>
+            </div>
+            <div class="form-group" style="margin-top: 24px;"><button class="btn btn-primary" id="goalContinueBtn">Continuar</button></div>
+        </section>
+
+        <section class="screen auth-screen" id="caloric-data-screen">
+            <h2>Quase lá!</h2>
+            <p>Precisamos de mais alguns dados para o cálculo calórico.</p>
+
+            <div class="form-group">
+                <label for="user-gender">Gênero:</label>
+                <select id="user-gender">
+                    <option value="male">Masculino</option>
+                    <option value="female">Feminino</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="user-age">Idade:</label>
+                <input type="number" id="user-age" placeholder="Ex: 25">
+            </div>
+            <div class="form-group">
+                <label for="user-height">Altura (cm):</label>
+                <input type="number" id="user-height" placeholder="Ex: 175">
+            </div>
+            <div class="form-group">
+                <label for="user-weight">Peso (kg):</label>
+                <input type="number" id="user-weight" placeholder="Ex: 70.5">
+            </div>
+            <div class="form-group">
+                <label for="user-activity">Nível de Atividade Física:</label>
+                <select id="user-activity">
+                    <option value="1.2">Sedentário (pouco ou nenhum exercício)</option>
+                    <option value="1.375">Levemente Ativo (1-3 dias/semana)</option>
+                    <option value="1.55">Moderadamente Ativo (3-5 dias/semana)</option>
+                    <option value="1.725">Muito Ativo (6-7 dias/semana)</option>
+                    <option value="1.9">Extremamente Ativo (trabalho físico + exercício)</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-top: 24px;">
+                <button class="btn btn-primary" id="caloricDataBtn">Continuar</button>
+            </div>
+        </section>
+
+        <section class="screen auth-screen" id="welcome-screen">
+            <div class="welcome-results">
+                <h1>Boas-vindas, <span id="welcome-username"></span>!</h1>
+                <p>Vamos começar sua jornada rumo ao <strong><span id="welcome-goal"></span></strong>!</p>
+                <br>
+                <p>Segundo as informações fornecidas, seu gasto calórico atual é de <strong><span id="welcome-tdee"></span> calorias</strong>.</p>
+                <p>Sua meta para alcançar seu objetivo é de <strong><span id="welcome-target"></span> calorias</strong> por dia.</p>
+                <br>
+                <button class="btn btn-primary" id="welcomeStartBtn">Começar</button>
+            </div>
+        </section>
+
+
+        <section class="screen auth-screen" id="profile-pic-screen">
+            <h2>Escolha sua foto de perfil</h2>
+            <img src="https://i.imgur.com/lOsEl90.png" alt="Preview da foto de perfil" id="profilePicPreview" class="profile-pic-preview">
+            <div class="form-group"><button class="btn btn-primary" id="chooseProfilePicBtn">Escolher Foto</button></div>
+            <div class="form-group"><button class="btn btn-secondary" id="skipProfilePicBtn">Adicionar depois</button></div>
+        </section>
+
+        <section class="screen" id="create-post-screen">
+            <h2 style="text-align: center; width: 100%; margin-bottom: 24px;" id="createPostTitle">Nova Refeição</h2>
+            <img src="#" alt="Preview da refeição" id="createPostPreview" class="create-post-preview">
+            <div class="form-group"><textarea id="postCaption" placeholder="Adicione uma legenda..."></textarea></div>
+            <div class="form-group"><button class="btn btn-primary" id="publishPostBtn">Publicar</button></div>
+        </section>
+
+        <section class="screen" id="main-app-screen">
+            <header class="app-header">
+                <img src="https://i.imgur.com/pPL5jeX.png" alt="Logotipo Nutria" class="logo-img">
+
+                <div class="header-icons">
+                    <span class="icon" id="icon-search"></span>
+                    <span class="icon" id="icon-notifications"></span>
+                </div>
+            </header>
+
+            <main class="app-content">
+                <div id="feed-view" class="content-view active">
+                    </div>
+
+                <div id="suggestions-view" class="content-view">
+                    <h2 id="suggestionTitle">Sugestões do Dia</h2>
+                    <div id="sugestao-Emagrecimento" class="suggestion-group">
+                        <div class="meal-card"><div class="meal-card-header"><span>☕</span> <h4>Café da Manhã</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> 2 fatias de pão integral com 2 ovos mexidos e 1/2 mamão papaia.</p></div></div>
+                        <div class="meal-card"><div class="meal-card-header"><span>🥗</span> <h4>Almoço</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> Salada verde à vontade, 100g de filé de frango grelhado e 3 colheres de sopa de arroz integral.</p></div></div>
+                        <div class="meal-card"><div class="meal-card-header"><span>🍎</span> <h4>Lanche da Tarde</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> 1 iogurte natural desnatado com 1 colher de sopa de aveia.</p></div></div>
+                        <div class="meal-card"><div class="meal-card-header"><span>🍲</span> <h4>Jantar</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> Sopa de legumes completa (cenoura, abobrinha, chuchu) com pedaços de frango desfiado.</p></div></div>
+                    </div>
+                    <div id="sugestao-massa" class="suggestion-group">
+                        <div class="meal-card"><div class="meal-card-header"><span>🍳</span> <h4>Café da Manhã</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> Crepioca (1 ovo + 2 claras + 2 col. de tapioca) recheada com 1 fatia de queijo minas e 1 banana com aveia.</p></div></div>
+                        <div class="meal-card"><div class="meal-card-header"><span>🍛</span> <h4>Almoço</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> 150g de patinho moído, 1 xícara de arroz branco, 1/2 xícara de feijão e salada de tomate e alface.</p></div></div>
+                         <div class="meal-card"><div class="meal-card-header"><span>🥜</span> <h4>Lanche da Tarde</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> Vitamina de 200ml de leite, 1 banana, 2 col. de aveia e 1 scoop de Whey Protein.</p></div></div>
+                        <div class="meal-card"><div class="meal-card-header"><span>🍠</span> <h4>Jantar</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> 150g de batata doce cozida, 150g de filé de frango grelhado e brócolis à vontade.</p></div></div>
+                    </div>
+                    <div id="sugestao-definir" class="suggestion-group">
+                        <div class="meal-card"><div class="meal-card-header"><span>🥚</span> <h4>Café da Manhã</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> 4 claras de ovo mexidas com orégano e 1/2 abacate pequeno (ou 2 castanhas-do-pará).</p></div></div>
+                        <div class="meal-card"><div class="meal-card-header"><span>🐟</span> <h4>Almoço</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> 150g de filé de tilápia assado, salada de folhas escuras (rúcula, agrião) e 2 colheres de sopa de quinoa.</p></div></div>
+                        <div class="meal-card"><div class="meal-card-header"><span>🥤</span> <h4>Lanche da Tarde</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> 1 scoop de Whey Protein Isolado com água e 1 maçã.</p></div></div>
+                        <div class="meal-card"><div class="meal-card-header"><span>🥦</span> <h4>Jantar</h4></div><div class="meal-card-body"><p><strong>Opção:</strong> Salada grande com 120g de peito de frango desfiado, tomate cereja, pepino e 1 colher de chá de azeite.</p></div></div>
+                    </div>
+                    <div class="form-group" style="margin-top: 24px;"><button class="btn btn-secondary" id="changeGoalSuggestionsBtn">Alterar Objetivo</button></div>
+                </div>
+
+                <div id="groups-view" class="content-view">
+
+                    <div id="groups-initial-view" class="group-sub-view active">
+                        <h2>Grupos Nutria</h2> <img src="https://i.imgur.com/72KUKAB.png" id="group-landing-image" alt="Cenoura fofa abraçando uma batata">
+                        <div class="form-group" style="width: 100%; max-width: 320px;">
+                            <button class="btn btn-primary" id="btn-show-create-group">Criar grupo</button>
+                            <button class="btn btn-secondary" style="margin-top: 16px;" id="btn-show-join-group">Entrar em grupo</button>
+                            <button class="btn" id="btn-show-business">Entrar com Nutria Business</button>
+                        </div>
+                    </div>
+
+                    <div id="groups-create-view" class="group-sub-view">
+                        <h2>Criar Novo Grupo</h2>
+                        <img src="https://i.imgur.com/lOsEl90.png" class="profile-pic-preview" alt="Foto do Grupo">
+
+                        <div class="form-group">
+                            <label for="group-name">Nome do grupo</label>
+                            <input type="text" id="group-name" placeholder="Ex: Focados no Verão">
+                        </div>
+                        <div class="form-group">
+                            <label for="group-privacy">Privacidade</label>
+                            <select id="group-privacy">
+                                <option value="public">Público</option>
+                                <option value="private">Privado</option>
+                            </select>
+                        </div>
+                         <div class="form-group">
+                            <label for="group-approval">Necessita aprovação de participante</label>
+                            <select id="group-approval">
+                                <option value="yes">Sim</option>
+                                <option value="no">Não</option>
+                            </select>
+                        </div>
+                         <div class="form-group">
+                            <label for="group-boost">Deseja impulsionar como empresa</label>
+                            <select id="group-boost">
+                                <option value="no">Não</option>
+                                <option value="yes">Sim</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn btn-primary">Criar Grupo</button>
+                            <button class="btn btn-secondary btn-back-to-groups" style="margin-top: 16px;">Voltar</button>
+                        </div>
+                    </div>
+
+                    <div id="groups-join-view" class="group-sub-view">
+                        <h2>Entrar em um Grupo</h2>
+
+                        <div id="groups-join-form" class="form-group" style="width: 100%;">
+                            <label for="group-key">Informe a chave de entrada do grupo</label>
+                            <input type="text" id="group-key" placeholder="ABC-123">
+                            <button class="btn btn-primary" id="btn-join-search" style="margin-top: 16px;">Buscar</button>
+                        </div>
+
+                        <div id="groups-join-result" class="form-group" style="display: none; text-align: center; width: 100%;">
+                            <h3>Time Swift</h3>
+                            <p>Grupo privado. Peça permissão para entrar.</p>
+                            <button class="btn btn-primary" id="btn-request-permission">Pedir permissão para entrar</button>
+                        </div>
+
+                        <div id="groups-join-status" style="display: none;">
+                            <p>✅</p>
+                            <p><strong>Aguardar Aprovação do Administrador do Grupo.</strong></p>
+                        </div>
+
+                        <div class="form-group" style="width: 100%;">
+                             <button class="btn btn-secondary btn-back-to-groups" style="margin-top: 16px;">Voltar</button>
+                        </div>
+                    </div>
+
+                </div>
+                <div id="profile-view" class="content-view">
+                         <div class="profile-summary">
+                             <img src="https://i.imgur.com/lOsEl90.png" alt="Foto do perfil" id="profilePagePic">
+                             <h2 id="profilePageUsername"></h2>
+                             <p><strong>Objetivo:</strong> <span id="profilePageGoal"></span></p>
+                         </div>
+
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span class="count" id="profilePostsCount">0</span>
+                                <span class="label">Posts</span>
+                            </div>
+                             <div class="stat-item">
+                                <span class="count" id="profileFollowersCount">0</span>
+                                <span class="label">Seguidores</span>
+                            </div>
+                             <div class="stat-item">
+                                <span class="count" id="profileFollowingCount">0</span>
+                                <span class="label">Seguindo</span>
+                            </div>
+                        </div>
+
+                        <div class="profile-summary"> <div class="buttons">
+                                <button class="btn btn-primary btn-small" id="changeGoalProfileBtn">Alterar Objetivo</button>
+                                <button class="btn btn-secondary btn-small" id="btn-premium-profile">Assinar Premium</button>
+                            </div>
+                        </div>
+                        <hr style="margin: 16px 0;"> <h3 style="margin: 16px 0; text-align: center;">Minhas Postagens</h3>
+                        <div id="user-posts-history">
+                            </div>
+                </div>
+            </main>
+
+            <footer class="bottom-nav">
+                <div class="nav-icon active" data-target="feed-view" id="icon-home"></div>
+                <div class="nav-icon" data-target="suggestions-view" id="icon-suggestions-new"></div>
+                <div class="nav-icon" data-target="add-post-action" id="icon-add"></div>
+                <div class="nav-icon" data-target="groups-view" id="icon-groups"></div>
+                <div class="nav-icon" data-target="profile-view" id="icon-profile"></div>
+            </footer>
+        </section>
+
+         <section class="screen" id="premium-screen">
+            <span class="close-premium-btn" id="close-premium-btn">&times;</span>
+            <img src="https://i.imgur.com/S4RCXqq.png" alt="Nutria Premium Logo" id="premium-logo">
+
+            <div id="premium-benefits">
+                 <p>✅ IA integrada para avaliação de refeições</p>
+                 <p>✅ Sugestões personalizadas conforme suas preferências</p>
+                 <p>✅ Selo Premium e Ofensiva exclusivos</p>
+                 <p>✅ Congelamento de ofensiva</p>
+                 <p>✅ Livre de anúncios</p>
+            </div>
+
+            <div class="form-group" style="width: 100%; max-width: 320px;">
+                 <button class="btn btn-primary" id="btn-subscribe-premium">Assinar Premium Agora</button>
+            </div>
+        </section>
+        <section class="screen" id="business-screen">
+             <span class="close-premium-btn" id="close-business-btn">&times;</span> <img src="https://i.imgur.com/cQg9KR9.png" alt="Nutria Business Logo" id="business-logo">
+
+             <p id="business-headline">Traga sua empresa para uma jornada rumo à alimentação saudável com o máximo da tecnologia Nutria</p>
+
+             <div id="business-benefits">
+                 <p>✅ IA integrada para avaliação de refeições</p>
+                 <p>✅ Sugestões personalizadas conforme suas preferências</p>
+                 <p>✅ Selo Premium e Ofensiva exclusivos</p>
+                 <p>✅ Congelamento de ofensiva</p>
+                 <p>✅ Livre de anúncios</p>
+             </div>
+
+             <div id="business-buttons">
+                  <button class="btn" id="btn-register-business">Cadastrar minha empresa</button>
+                  <button class="btn" id="btn-login-business">Entrar com empresa cadastrada</button>
+             </div>
+         </section>
+         <div id="addPostModal">
+            <button class="btn btn-secondary" id="addMealBtn">Adicionar Refeição</button>
+            <button class="btn btn-secondary" id="addStoryBtn">Adicionar Story</button>
+        </div>
+
+        <div id="photoOptionsModal" class="modal">
+            <div class="modal-content">
+                <h3>Adicionar Refeição</h3>
+                <button class="btn btn-primary" id="takePhotoBtn">Tirar Foto</button>
+                <button class="btn btn-secondary" id="chooseGalleryBtn">Escolher da Galeria</button>
+                <button class="btn btn-cancel" id="closeModalBtn">Cancelar</button>
+            </div>
+        </div>
+
+        <div class="story-view-screen" id="story-view-screen">
+            <span class="close-story-btn" id="close-story-btn">&times;</span>
+            <img src="" alt="Story" id="story-view-image">
+        </div>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        let isExistingUser = false;
+        let postType = 'meal';
+
+        const svgIcons = {
+            home: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`,
+            add: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>`,
+            profile: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`,
+            suggestions: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`,
+            groups: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V18c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-1.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V18c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-1.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`,
+            search: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>`,
+            notifications: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341A6.002 6.002 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>`,
+            heart_outline: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 016.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>`,
+            heart_filled: `<svg fill="currentColor" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>`,
+            comment: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z"></path></svg>`
+        };
+
+        const loadIcons = () => {
+            // Nav Inferior
+            document.getElementById('icon-home').innerHTML = svgIcons.home;
+            document.getElementById('icon-suggestions-new').innerHTML = svgIcons.suggestions;
+            document.getElementById('icon-add').innerHTML = svgIcons.add;
+            document.getElementById('icon-groups').innerHTML = svgIcons.groups;
+            document.getElementById('icon-profile').innerHTML = svgIcons.profile;
+            // Nav Superior
+            document.getElementById('icon-search').innerHTML = svgIcons.search;
+            document.getElementById('icon-notifications').innerHTML = svgIcons.notifications;
+        };
+
+        // DADOS DO USUÁRIO ATUALIZADOS
+     let currentUser = {
+            username: '@visitante',
+            profilePic: 'https://i.imgur.com/lOsEl90.png',
+            goal: 'Emagrecimento',
+            // Novos campos
+            gender: 'male',
+            age: 0,
+            height: 0,
+            weight: 0,
+            activity: 1.2,
+            tdee: 0,
+            calorieTarget: 0,
+            // Fim dos novos campos
+            streak: 0,
+            postCount: 0,
+            followers: 0,
+            following: 0
+        };
+
+        // DADOS DOS POSTS ATUALIZADOS (sem score, com streak)
+        let posts = [
+             { id: 2, username: '@rodrigo_lima', avatar: 'https://i.pravatar.cc/80?u=rodrigo_lima', streak: 9, image: 'https://i.imgur.com/tfr3IhP.jpg', caption: 'Café da manhã reforçado para começar o dia!', likes: 142, comments: [] },
+             { id: 1, username: '@ana.souza', avatar: 'https://i.pravatar.cc/80?u=ana.souza', streak: 3, image: 'https://i.imgur.com/u41Si2o.jpg', caption: 'Almoço de hoje: simples e delicioso.', likes: 123, comments: [
+                 { id: 1001, username: '@bruno.g', text: 'Parece ótimo!', likes: 2 }
+             ]}
+        ];
+
+        let stories = [
+            { id: 101, username: '@ana.souza', avatar: 'https://i.pravatar.cc/80?u=ana.souza', image: 'https://i.imgur.com/O49vJvD.jpg' },
+            { id: 102, username: '@rodrigo_lima', avatar: 'https://i.pravatar.cc/80?u=rodrigo_lima', image: 'https://i.imgur.com/3qP3R8F.jpg' },
+        ];
+
+        const screens = document.querySelectorAll('.screen');
+        const showScreen = (screenId) => {
+            screens.forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId)?.classList.add('active');
+        };
+
+        document.getElementById('nextOnboardingBtn').addEventListener('click', () => showScreen('onboarding-2'));
+        document.getElementById('skipIntroBtn').addEventListener('click', () => showScreen('login-screen'));
+        document.getElementById('startBtn').addEventListener('click', () => showScreen('login-screen'));
+        document.getElementById('showRegister').addEventListener('click', (e) => { e.preventDefault(); showScreen('register-screen'); });
+
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            currentUser.username = username ? `@${username}` : '@sem_nome';
+            // Zera as stats ao registrar
+            currentUser.streak = 0;
+            currentUser.postCount = 0;
+            currentUser.followers = 0;
+            currentUser.following = 0;
+            showScreen('goal-screen');
+        });
+
+        document.querySelectorAll('.goal-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.goal-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentUser.goal = button.dataset.goal;
+            });
+        });
+
+        document.getElementById('goalContinueBtn').addEventListener('click', () => {
+            if (!currentUser.goal) {
+                alert('Por favor, selecione um objetivo.');
+                return;
+            }
+            if (isExistingUser) {
+                updateUserInfoUI();
+                showScreen('main-app-screen');
+                switchView('suggestions-view');
+            } else {
+                // ALTERAÇÃO AQUI: Vai para a tela de dados calóricos
+                showScreen('caloric-data-screen');
+            }
+        });
+
+        document.getElementById('changeGoalSuggestionsBtn').addEventListener('click', () => showScreen('goal-screen'));
+        document.getElementById('changeGoalProfileBtn').addEventListener('click', () => showScreen('goal-screen'));
+
+        const profilePicInput = document.getElementById('profilePicInput');
+        document.getElementById('chooseProfilePicBtn').addEventListener('click', () => profilePicInput.click());
+        document.getElementById('profilePicPreview').addEventListener('click', () => profilePicInput.click());
+        profilePicInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentUser.profilePic = e.target.result;
+                    document.getElementById('profilePicPreview').src = e.target.result;
+                    // ALTERAÇÃO AQUI: Vai para a tela de boas-vindas
+                    populateWelcomeScreen();
+                    showScreen('welcome-screen');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        document.getElementById('skipProfilePicBtn').addEventListener('click', () => {
+            currentUser.profilePic = 'https://i.imgur.com/lOsEl90.png';
+             // ALTERAÇÃO AQUI: Vai para a tela de boas-vindas
+             populateWelcomeScreen();
+             showScreen('welcome-screen');
+        });
+
+        const startApp = () => {
+            isExistingUser = true;
+            updateUserInfoUI();
+            renderFeed();
+            showScreen('main-app-screen');
+            switchView('feed-view');
+        };
+
+        // FUNÇÃO DE ATUALIZAR UI ATUALIZADA
+        const updateUserInfoUI = () => {
+            const goalMap = { 'Emagrecimento': 'Emagrecimento', 'massa': 'Ganho de Massa', 'definir': 'Manutenção calórica' };
+
+            // ATUALIZA INFO DA PÁGINA DE PERFIL
+            document.getElementById('profilePageUsername').textContent = currentUser.username;
+            document.getElementById('profilePagePic').src = currentUser.profilePic;
+            document.getElementById('profilePageGoal').textContent = goalMap[currentUser.goal] || 'Não definido';
+            // Novas Stats
+            document.getElementById('profilePostsCount').textContent = currentUser.postCount;
+            document.getElementById('profileFollowersCount').textContent = currentUser.followers; // Mock
+            document.getElementById('profileFollowingCount').textContent = currentUser.following; // Mock
+        };
+
+        const photoOptionsModal = document.getElementById('photoOptionsModal');
+        const addPostModal = document.getElementById('addPostModal');
+        const photoOptionsTitle = photoOptionsModal.querySelector('h3');
+
+        const openPhotoModal = () => {
+            photoOptionsTitle.textContent = postType === 'meal' ? 'Adicionar Refeição' : 'Adicionar Story';
+            photoOptionsModal.style.display = 'flex';
+        }
+        const closePhotoModal = () => photoOptionsModal.style.display = 'none';
+
+        const toggleAddPostModal = () => {
+            const display = addPostModal.style.display === 'block' ? 'none' : 'block';
+            addPostModal.style.display = display;
+        }
+
+        document.getElementById('takePhotoBtn').addEventListener('click', () => document.getElementById('takePhotoInput').click());
+        document.getElementById('chooseGalleryBtn').addEventListener('click', () => document.getElementById('galleryInput').click());
+        document.getElementById('closeModalBtn').addEventListener('click', closePhotoModal);
+
+        document.getElementById('addMealBtn').addEventListener('click', () => {
+            postType = 'meal';
+            toggleAddPostModal();
+            openPhotoModal();
+        });
+        document.getElementById('addStoryBtn').addEventListener('click', () => {
+            postType = 'story';
+            toggleAddPostModal();
+            openPhotoModal();
+        });
+
+        const handleFileSelect = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('createPostPreview').src = e.target.result;
+                    document.getElementById('createPostTitle').textContent = postType === 'meal' ? 'Nova Refeição' : 'Novo Story';
+                    showScreen('create-post-screen');
+                    closePhotoModal();
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        document.getElementById('takePhotoInput').addEventListener('change', handleFileSelect);
+        document.getElementById('galleryInput').addEventListener('change', handleFileSelect);
+
+        // FUNÇÃO DE PUBLICAÇÃO ATUALIZADA
+        document.getElementById('publishPostBtn').addEventListener('click', () => {
+            const imageUrl = document.getElementById('createPostPreview').src;
+            const caption = document.getElementById('postCaption').value || '';
+
+            if (postType === 'meal') {
+                // Incrementa streak e post count ANTES de criar o post
+                currentUser.streak++;
+                currentUser.postCount++;
+
+                const newPost = {
+                    id: Date.now(),
+                    username: currentUser.username,
+                    avatar: currentUser.profilePic,
+                    streak: currentUser.streak, // Usa a streak atualizada do usuário
+                    image: imageUrl,
+                    caption: caption || 'Refeição deliciosa! 😋',
+                    likes: 0,
+                    comments: []
+                };
+                posts.unshift(newPost);
+                updateUserInfoUI(); // Atualiza a UI com os novos contadores
+
+            } else {
+                // Publica como STORY
+                const newStory = {
+                    id: Date.now(),
+                    username: currentUser.username,
+                    avatar: currentUser.profilePic,
+                    image: imageUrl,
+                };
+                stories.unshift(newStory);
+                // Publicar story não incrementa streak nem post count (decisão de design)
+            }
+
+            renderFeed();
+            showScreen('main-app-screen');
+            switchView('feed-view');
+            document.getElementById('postCaption').value = '';
+        });
+
+        // FUNÇÃO DE CRIAR ELEMENTO DO POST ATUALIZADA
+        const createPostElement = (post) => {
+            const postEl = document.createElement('article');
+            postEl.className = 'feed-post';
+
+            const commentsHtml = (post.comments || []).map(comment => `
+                <div class="comment-item" data-comment-id="${comment.id}">
+                    <span class="comment-user">${comment.username}</span>
+                    <span class="comment-text">${comment.text}</span>
+                    <div class="comment-like">
+                        <span class="comment-like-btn">${svgIcons.heart_outline}</span>
+                        <span class="comment-like-count">${comment.likes}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Formata o número da streak
+            const formattedStreak = String(post.streak).padStart(2, '0');
+
+            postEl.innerHTML = `
+                <div class="post-header">
+                    <div class="post-user"><img src="${post.avatar}" alt="Avatar"><div><div class="username">${post.username}</div></div></div>
+                    <div class="post-streak"><span>${formattedStreak}</span></div>
+                </div>
+                <img src="${post.image}" alt="Foto da refeição" class="post-image">
+                <div class="post-footer">
+                    <div class="post-interactions">
+                        <span class="interaction-icon like-btn">${svgIcons.heart_outline}</span>
+                        <span class="interaction-icon comment-btn">${svgIcons.comment}</span>
+                    </div>
+                    <p class="post-likes">${post.likes} curtidas</p>
+                    <p class="post-caption"><span class="username">${post.username}</span> ${post.caption}</p>
+                    <div class="post-comments-container">${commentsHtml}</div>
+                    <p class="add-comment-link">Adicionar um comentário...</p>
+                </div>`;
+
+            const likeBtn = postEl.querySelector('.like-btn');
+            const postLikesEl = postEl.querySelector('.post-likes');
+
+            const toggleLike = () => {
+                const postData = posts.find(p => p.id === post.id);
+                if (!postData) return;
+                const liked = likeBtn.classList.toggle('liked');
+                if (liked) {
+                    postData.likes++;
+                    likeBtn.innerHTML = svgIcons.heart_filled;
+                } else {
+                    postData.likes--;
+                    likeBtn.innerHTML = svgIcons.heart_outline;
+                }
+                postLikesEl.textContent = `${postData.likes} curtidas`;
+            };
+
+            postEl.querySelector('.post-image').addEventListener('dblclick', () => {
+                if (!likeBtn.classList.contains('liked')) {
+                    toggleLike();
+                }
+            });
+            likeBtn.addEventListener('click', toggleLike);
+
+            postEl.querySelector('.add-comment-link').addEventListener('click', () => {
+                const commentText = prompt('Adicione um comentário:');
+                if (commentText) {
+                    const newComment = { id: Date.now(), username: currentUser.username, text: commentText, likes: 0 };
+                    const postData = posts.find(p => p.id === post.id);
+                    if (postData) {
+                        postData.comments.push(newComment);
+                        renderFeed();
+                    }
+                }
+            });
+
+            postEl.querySelectorAll('.comment-like-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const commentItem = btn.closest('.comment-item');
+                    const commentId = Number(commentItem.dataset.commentId);
+                    const postData = posts.find(p => p.id === post.id);
+                    const commentData = postData.comments.find(c => c.id === commentId);
+
+                    if (commentData) {
+                        const liked = btn.classList.toggle('liked');
+                        if (liked) {
+                            commentData.likes++;
+                            btn.innerHTML = svgIcons.heart_filled;
+                        } else {
+                            commentData.likes--;
+                            btn.innerHTML = svgIcons.heart_outline;
+                        }
+                        commentItem.querySelector('.comment-like-count').textContent = commentData.likes;
+                    }
+                });
+            });
+
+            return postEl;
+        };
+
+        const storyViewScreen = document.getElementById('story-view-screen');
+        const storyViewImage = document.getElementById('story-view-image');
+        document.getElementById('close-story-btn').addEventListener('click', () => {
+            storyViewScreen.classList.remove('active');
+        });
+
+        const showStoryView = (story) => {
+            storyViewImage.src = story.image;
+            storyViewScreen.classList.add('active');
+        }
+
+        const renderStories = (container) => {
+            const storiesBar = document.createElement('section');
+            storiesBar.className = 'stories-bar';
+
+            const myStoryBubble = document.createElement('div');
+            myStoryBubble.className = 'story-bubble';
+            myStoryBubble.innerHTML = `
+                <div class="story-img-wrapper">
+                    <img src="${currentUser.profilePic}" alt="Seu Story" class="story-img">
+                </div>
+                <span class="story-username">Seu Story</span>
+            `;
+            myStoryBubble.addEventListener('click', () => {
+                postType = 'story';
+                openPhotoModal();
+            });
+            storiesBar.appendChild(myStoryBubble);
+
+            stories.forEach(story => {
+                if (story.username === currentUser.username) return;
+
+                const bubble = document.createElement('div');
+                bubble.className = 'story-bubble';
+                bubble.innerHTML = `
+                    <div class="story-img-wrapper">
+                        <img src="${story.avatar}" alt="${story.username}" class="story-img">
+                    </div>
+                    <span class="story-username">${story.username}</span>
+                `;
+                bubble.addEventListener('click', () => showStoryView(story));
+                storiesBar.appendChild(bubble);
+            });
+
+            container.appendChild(storiesBar);
+        }
+
+        const renderFeed = () => {
+            const feedContainer = document.getElementById('feed-view');
+            const userHistoryContainer = document.getElementById('user-posts-history');
+            feedContainer.innerHTML = '';
+            userHistoryContainer.innerHTML = '';
+
+            renderStories(feedContainer);
+
+            const myPosts = posts.filter(p => p.username === currentUser.username);
+
+            if (posts.length === 0) {
+                const noFeed = document.createElement('p');
+                noFeed.textContent = 'Seu feed está vazio.';
+                noFeed.style = 'text-align:center; padding: 20px;';
+                feedContainer.appendChild(noFeed);
+            }
+            if (myPosts.length === 0) userHistoryContainer.innerHTML = '<p style="text-align:center; padding: 20px;">Você ainda não postou nada.</p>';
+
+            posts.forEach(post => feedContainer.appendChild(createPostElement(post)));
+            myPosts.forEach(post => userHistoryContainer.appendChild(createPostElement(post)));
+        };
+
+        const contentViews = document.querySelectorAll('.content-view');
+        const bottomNavIcons = document.querySelectorAll('.bottom-nav .nav-icon');
+
+        const switchView = (targetId) => {
+            addPostModal.style.display = 'none';
+
+            contentViews.forEach(v => v.classList.remove('active'));
+            document.getElementById(targetId)?.classList.add('active');
+            bottomNavIcons.forEach(i => i.classList.toggle('active', i.dataset.target === targetId));
+
+            // --- (NOVO) CÓDIGO PARA RESETAR A ABA GRUPOS ---
+            if (targetId === 'groups-view') {
+                showGroupSubView('groups-initial-view');
+                resetJoinGroupView();
+            }
+            // --- FIM DO NOVO CÓDIGO ---
+
+            if (targetId === 'suggestions-view') {
+                document.querySelectorAll('.suggestion-group').forEach(sg => sg.style.display = 'none');
+                const targetSuggestion = `sugestao-${currentUser.goal}`;
+                const suggestionEl = document.getElementById(targetSuggestion);
+                if (suggestionEl) {
+                    suggestionEl.style.display = 'block';
+                }
+            }
+        };
+
+        bottomNavIcons.forEach(icon => {
+            icon.addEventListener('click', () => {
+                const target = icon.dataset.target;
+                if (target === 'add-post-action') {
+                    toggleAddPostModal();
+                } else {
+                    switchView(target);
+                }
+            });
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Simula um login com dados ATUALIZADOS
+            currentUser = {
+                username: '@teste_login',
+                profilePic: 'https://i.pravatar.cc/80',
+                goal: 'Emagrecimento',
+                // Simula dados calóricos para um usuário existente
+                gender: 'male', age: 30, height: 180, weight: 80, activity: 1.55,
+                tdee: 2638, // Exemplo, recalcularia na prática
+                calorieTarget: 2138, // Exemplo
+                // Fim dados calóricos
+                streak: 5,
+                postCount: 1,
+                followers: 125,
+                following: 50
+            };
+            posts.push({
+                id: 3, username: '@teste_login', avatar: 'https://i.pravatar.cc/80', streak: 5,
+                image: 'https://i.imgur.com/8mB6hXW.jpg', caption: 'Acabei de entrar!', likes: 12, comments: []
+            });
+            startApp();
+        });
+
+
+
+        // === LÓGICA DA ABA GRUPOS ===
+
+        // Cache dos elementos da aba Grupos
+        const groupsView = document.getElementById('groups-view');
+        const groupSubViews = groupsView.querySelectorAll('.group-sub-view');
+        const btnShowCreateGroup = document.getElementById('btn-show-create-group');
+        const btnShowJoinGroup = document.getElementById('btn-show-join-group');
+        const btnsBackToGroups = groupsView.querySelectorAll('.btn-back-to-groups');
+        const btnShowBusiness = document.getElementById('btn-show-business'); // NOVO BOTÃO
+
+        // Elementos do Fluxo "Entrar"
+        const joinForm = document.getElementById('groups-join-form');
+        const btnJoinSearch = document.getElementById('btn-join-search');
+        const joinResult = document.getElementById('groups-join-result');
+        const btnRequestPermission = document.getElementById('btn-request-permission');
+        const joinStatus = document.getElementById('groups-join-status');
+
+        // Função para trocar as sub-telas (Inicial, Criar, Entrar)
+        const showGroupSubView = (viewId) => {
+            groupSubViews.forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId)?.classList.add('active');
+        }
+
+        // Função para resetar o fluxo de "Entrar no Grupo"
+        const resetJoinGroupView = () => {
+            joinForm.style.display = 'block';
+            joinResult.style.display = 'none';
+            joinStatus.style.display = 'none';
+            document.getElementById('group-key').value = ''; // Limpa o campo
+        }
+
+        // Navegação principal da aba
+        btnShowCreateGroup.addEventListener('click', () => showGroupSubView('groups-create-view'));
+
+        btnShowJoinGroup.addEventListener('click', () => {
+            resetJoinGroupView(); // Garante que o fluxo está resetado ao entrar
+            showGroupSubView('groups-join-view');
+        });
+
+        btnsBackToGroups.forEach(btn => {
+            btn.addEventListener('click', () => showGroupSubView('groups-initial-view'));
+        });
+
+        // (NOVO) Listener para o botão Business
+        btnShowBusiness.addEventListener('click', () => {
+            showScreen('business-screen');
+        });
+
+
+        // Simulação de "Entrar no Grupo" (Fluxo Fictício)
+        btnJoinSearch.addEventListener('click', (e) => {
+            e.preventDefault(); // Impede o envio do formulário
+            // Esconde o form e mostra o resultado fictício
+            joinForm.style.display = 'none';
+            joinResult.style.display = 'block';
+            joinStatus.style.display = 'none';
+        });
+
+        btnRequestPermission.addEventListener('click', () => {
+            // Esconde o resultado e mostra o status final
+            joinForm.style.display = 'none';
+            joinResult.style.display = 'none';
+            joinStatus.style.display = 'block';
+        });
+
+        // === FIM DA LÓGICA DE GRUPOS ===
+
+        // === LÓGICA DE CÁLCULO CALÓRICO ===
+
+        const calculateTMB = () => {
+            const { gender, age, height, weight } = currentUser;
+            if (gender === 'male') {
+                // Homens: 88.362 + (13.397 * peso) + (4.799 * altura) - (5.677 * idade)
+                return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+            } else {
+                // Mulheres: 447.593 + (9.247 * peso) + (3.098 * altura) - (4.330 * idade)
+                return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+            }
+        };
+
+        const calculateTDEE = (tmb) => {
+            // Resultado 1: Gasto Calórico Atual (TDEE)
+            const tdee = tmb * currentUser.activity;
+            return Math.round(tdee);
+        };
+
+        const calculateTarget = (tdee) => {
+            // Resultado 2: Meta Calórica Diária
+            switch (currentUser.goal) {
+                case 'Emagrecimento':
+                    return tdee - 500;
+                case 'massa':
+                    return tdee + 500;
+                case 'definir':
+                default:
+                    return tdee;
+            }
+        };
+
+        const populateWelcomeScreen = () => {
+            const goalMap = { 'Emagrecimento': 'Emagrecimento', 'massa': 'Ganho de Massa', 'definir': 'Manutenção' };
+
+            document.getElementById('welcome-username').textContent = currentUser.username;
+            document.getElementById('welcome-goal').textContent = goalMap[currentUser.goal] || 'seu objetivo';
+            document.getElementById('welcome-tdee').textContent = currentUser.tdee;
+            document.getElementById('welcome-target').textContent = currentUser.calorieTarget;
+        };
+
+        // Listener para a nova tela de dados calóricos
+        document.getElementById('caloricDataBtn').addEventListener('click', () => {
+            // 1. Coletar dados do formulário
+            currentUser.gender = document.getElementById('user-gender').value;
+            currentUser.age = parseFloat(document.getElementById('user-age').value) || 0;
+            currentUser.height = parseFloat(document.getElementById('user-height').value) || 0;
+            currentUser.weight = parseFloat(document.getElementById('user-weight').value) || 0;
+            currentUser.activity = parseFloat(document.getElementById('user-activity').value) || 1.2;
+
+            // Validação básica (adicionar se necessário)
+            if (currentUser.age <= 0 || currentUser.height <= 0 || currentUser.weight <= 0) {
+                 alert('Por favor, preencha todos os dados com valores válidos.');
+                 return;
+            }
+
+
+            // 2. Realizar Cálculos
+            const tmb = calculateTMB();
+            currentUser.tdee = calculateTDEE(tmb);
+            currentUser.calorieTarget = calculateTarget(currentUser.tdee);
+
+            // 3. Navegar para a próxima tela (Foto de Perfil)
+            showScreen('profile-pic-screen');
+        });
+
+        // Listener para o botão final "Começar" na tela de boas-vindas
+        document.getElementById('welcomeStartBtn').addEventListener('click', () => {
+            startApp(); // Agora o startApp é chamado AQUI.
+        });
+
+        // === FIM DA LÓGICA CALÓRICA ===
+
+        // === NAVEGAÇÃO PREMIUM & BUSINESS ===
+
+        // Listener no botão "Assinar Premium" do perfil
+        document.getElementById('btn-premium-profile').addEventListener('click', () => {
+            showScreen('premium-screen'); // Mostra a tela premium
+        });
+
+        // Listener no botão "X" (fechar) da tela premium
+        document.getElementById('close-premium-btn').addEventListener('click', () => {
+            // Volta para a tela principal E ativa a aba de perfil
+            showScreen('main-app-screen');
+            switchView('profile-view');
+        });
+
+        // Listener para o botão de assinatura final (ação futura)
+        document.getElementById('btn-subscribe-premium').addEventListener('click', () => {
+             alert('Funcionalidade de assinatura ainda não implementada.');
+             // Aqui você adicionaria a lógica de pagamento ou confirmação
+        });
+
+         // (NOVO) Listener no botão "X" (fechar) da tela business
+         document.getElementById('close-business-btn').addEventListener('click', () => {
+             // Volta para a tela principal E ativa a aba de grupos
+             showScreen('main-app-screen');
+             switchView('groups-view');
+         });
+
+         // (NOVO) Listeners para os botões finais da tela business
+         document.getElementById('btn-register-business').addEventListener('click', () => {
+              alert('Funcionalidade de cadastro de empresa ainda não implementada.');
+         });
+         document.getElementById('btn-login-business').addEventListener('click', () => {
+              alert('Funcionalidade de login de empresa ainda não implementada.');
+         });
+
+        // === FIM DA NAVEGAÇÃO PREMIUM & BUSINESS ===
+
+
+        loadIcons();
+        renderFeed();
+
+    });
+    </script>
+</body>
+</html>

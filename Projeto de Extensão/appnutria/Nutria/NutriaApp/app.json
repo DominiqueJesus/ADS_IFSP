@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "Nutria",
+    "slug": "nutria-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "nutria",
+    "icon": "./assets/images/app-icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.nutria.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "O Nutria precisa acessar sua câmera para registrar suas refeições.",
+        "NSPhotoLibraryUsageDescription": "O Nutria precisa acessar sua galeria para escolher fotos das suas refeições."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/app-icon.png",
+        "backgroundColor": "#FE4A01"
+      },
+      "package": "com.nutria.app",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O Nutria precisa acessar sua câmera para registrar suas refeições."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Nutria precisa acessar sua galeria para escolher fotos das suas refeições."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "116466b9-66e5-4888-87d4-5a056aef93d6"
+      }
+    },
+    "owner": "diegodfb"
+  }
+}
